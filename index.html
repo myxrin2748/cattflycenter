@@ -3,110 +3,796 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cattfly Center</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Cattfly Center v2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        
+        :root {
+            --bg: #0b0d11;
+            --surface: #13161d;
+            --surface2: #1a1e28;
+            --border: rgba(255,255,255,0.07);
+            --border-hover: rgba(255,255,255,0.18);
+            --text: #e8ecf4;
+            --muted: #6b7280;
+            --accent-blue: #4f8ef7;
+            --accent-violet: #8b5cf6;
+            --accent-amber: #f59e0b;
+            --accent-green: #10b981;
+            --accent-pink: #ec4899;
+            --accent-teal: #06b6d4;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* === ANIMATED BACKGROUND === */
+        .bg-noise {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+            opacity: 0.5;
         }
 
-        .glass-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-color: #3b82f6;
+        .bg-glow {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% 10%, rgba(79, 142, 247, 0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 80% 80%, rgba(139, 92, 246, 0.07) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 50% at 50% 50%, rgba(6, 182, 212, 0.04) 0%, transparent 70%);
         }
 
-        .search-bar:focus-within {
-            ring: 2px solid #3b82f6;
+        /* === LAYOUT === */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem 5rem;
         }
+
+        /* === HEADER === */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeUp 0.6s ease both;
+        }
+
+        .logo-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.2rem;
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-violet));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 0 20px rgba(79, 142, 247, 0.35);
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 6vw, 2.8rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text);
+        }
+
+        h1 span {
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 300;
+            margin-top: 0.4rem;
+            letter-spacing: 0.01em;
+        }
+
+        .version-badge {
+            display: inline-block;
+            font-family: 'Syne', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: var(--accent-violet);
+            background: rgba(139, 92, 246, 0.12);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            padding: 3px 10px;
+            border-radius: 99px;
+            margin-bottom: 1.2rem;
+        }
+
+        /* === SEARCH === */
+        .search-wrap {
+            max-width: 420px;
+            margin: 2rem auto 0;
+            position: relative;
+            animation: fadeUp 0.6s 0.1s ease both;
+        }
+
+        .search-wrap i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 0.85rem;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .search-wrap:focus-within i { color: var(--accent-blue); }
+
+        #searchInput {
+            width: 100%;
+            padding: 13px 16px 13px 42px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        #searchInput::placeholder { color: var(--muted); }
+        #searchInput:focus {
+            border-color: rgba(79, 142, 247, 0.5);
+            box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.1);
+        }
+
+        /* === SECTION LABEL === */
+        .section-label {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            padding-left: 2px;
+        }
+
+        /* === GRID === */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .grid-single {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        /* === CARD === */
+        .card {
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.4rem;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.25s, box-shadow 0.3s;
+            cursor: pointer;
+            animation: fadeUp 0.5s ease both;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.01);
+            border-color: var(--border-hover);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 0 1px var(--card-accent, var(--accent-blue)) inset;
+        }
+
+        .card:hover::before { opacity: 1; }
+
+        /* Accent glow on hover per card color */
+        .card-blue:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 25px rgba(79,142,247,0.12); }
+        .card-amber:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 25px rgba(245,158,11,0.12); }
+        .card-green:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 25px rgba(16,185,129,0.12); }
+        .card-pink:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 25px rgba(236,72,153,0.12); }
+        .card-teal:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 25px rgba(6,182,212,0.12); }
+        .card-violet:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 25px rgba(139,92,246,0.12); }
+
+        /* Stagger animation delays */
+        .card:nth-child(1) { animation-delay: 0.15s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.25s; }
+        .card:nth-child(4) { animation-delay: 0.3s; }
+        .card:nth-child(5) { animation-delay: 0.35s; }
+        .card:nth-child(6) { animation-delay: 0.4s; }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .card:hover .card-icon { transform: scale(1.1) rotate(-4deg); }
+
+        .icon-blue { background: rgba(79,142,247,0.15); color: var(--accent-blue); }
+        .icon-amber { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+        .icon-green { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+        .icon-pink { background: rgba(236,72,153,0.15); color: var(--accent-pink); }
+        .icon-teal { background: rgba(6,182,212,0.15); color: var(--accent-teal); }
+        .icon-violet { background: rgba(139,92,246,0.15); color: var(--accent-violet); }
+
+        .card-category {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+        }
+
+        .cat-blue { color: var(--accent-blue); }
+        .cat-amber { color: var(--accent-amber); }
+        .cat-green { color: var(--accent-green); }
+        .cat-pink { color: var(--accent-pink); }
+        .cat-teal { color: var(--accent-teal); }
+        .cat-violet { color: var(--accent-violet); }
+
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .card-desc {
+            font-size: 0.8rem;
+            color: var(--muted);
+            line-height: 1.55;
+            flex-grow: 1;
+            font-weight: 300;
+        }
+
+        .card-cta {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--muted);
+            margin-top: 1.1rem;
+            transition: color 0.2s, gap 0.25s;
+        }
+
+        .card:hover .card-cta {
+            gap: 10px;
+        }
+
+        .card-blue:hover .card-cta { color: var(--accent-blue); }
+        .card-amber:hover .card-cta { color: var(--accent-amber); }
+        .card-green:hover .card-cta { color: var(--accent-green); }
+        .card-pink:hover .card-cta { color: var(--accent-pink); }
+        .card-teal:hover .card-cta { color: var(--accent-teal); }
+        .card-violet:hover .card-cta { color: var(--accent-violet); }
+
+        /* === DONATE CARD (wide) === */
+        .card-donate {
+            flex-direction: row;
+            align-items: center;
+            gap: 1.2rem;
+            border-style: dashed;
+            border-color: rgba(245,158,11,0.3);
+            background: linear-gradient(135deg, rgba(245,158,11,0.05), rgba(236,72,153,0.05));
+        }
+
+        .card-donate .card-icon { margin-bottom: 0; flex-shrink: 0; }
+
+        .donate-text { flex: 1; }
+        .donate-text .card-title { font-size: 1rem; margin-bottom: 0.3rem; }
+        .donate-text .card-desc { font-size: 0.78rem; }
+        .donate-text .card-cta { margin-top: 0.8rem; }
+
+        .donate-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Syne', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent-amber), var(--accent-pink));
+            color: #fff;
+            cursor: pointer;
+            flex-shrink: 0;
+            text-decoration: none;
+            transition: opacity 0.2s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(245,158,11,0.3);
+        }
+
+        .donate-btn:hover { opacity: 0.9; transform: scale(1.04); }
+
+        /* === EMPTY STATE === */
+        #emptyState {
+            display: none;
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--muted);
+        }
+
+        #emptyState i { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.4; }
+        #emptyState p { font-size: 0.9rem; }
+
+        /* === FOOTER === */
+        footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.78rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            font-weight: 300;
+        }
+
+        footer a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+        footer a:hover { color: var(--accent-blue); }
+
+        .footer-badges {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 99px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        .footer-badge i { font-size: 0.65rem; }
+
+        /* === TOAST === */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--surface2);
+            border: 1px solid var(--border-hover);
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 0.82rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            z-index: 999;
+            opacity: 0;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+            white-space: nowrap;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* === MODAL === */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border-hover);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 100%;
+            transform: scale(0.92) translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.4rem;
+        }
+
+        .modal-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .modal-close:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+
+        .donate-methods {
+            display: grid;
+            gap: 10px;
+        }
+
+        .donate-method {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .donate-method:hover { border-color: var(--border-hover); background: rgba(255,255,255,0.04); }
+
+        .dm-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .dm-info { flex: 1; }
+        .dm-name { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.88rem; margin-bottom: 2px; }
+        .dm-desc { font-size: 0.72rem; color: var(--muted); }
+        .dm-arrow { color: var(--muted); font-size: 0.8rem; }
+
+        /* === ANIMATIONS === */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* hidden cards */
+        .card.hidden { display: none; }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+<body>
+    <div class="bg-noise"></div>
+    <div class="bg-glow"></div>
 
-    <!-- Header Section -->
-    <header class="w-full max-w-6xl text-center mb-12 mt-10">
-        <h1 class="text-4xl md:text-5xl font-bold text-slate-800 mb-8 tracking-tight">
-            Cattfly <span class="text-blue-600">Center</span>
-        </h1>
-        
-        <!-- Search Bar -->
-        <div class="max-w-md mx-auto relative group">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i class="fas fa-search text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="version-badge">V 2.0</div>
+            <div class="logo-wrap">
+                <div class="logo-icon">🐱</div>
+                <h1>Cattfly <span>Center</span></h1>
             </div>
-            <input type="text" id="searchInput" 
-                class="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-2xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm transition-all shadow-sm" 
-                placeholder="Cari link...">
+            <p class="subtitle">Hub terpusat untuk semua resource, tool, dan komunitas Cattfly.</p>
+
+            <div class="search-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Cari link, kategori..." autocomplete="off" spellcheck="false">
+            </div>
+        </header>
+
+        <!-- Main Links -->
+        <div id="allCards">
+            <p class="section-label">Resources & Tools</p>
+            <div class="grid" id="mainGrid">
+
+                <!-- Pusat Preset -->
+                <a href="https://cattflylab.vercel.app/" target="_blank" rel="noopener"
+                   class="card card-blue link-card"
+                   data-title="Pusat Preset" data-cat="resources" data-desc="preset kreatif desain editing">
+                    <div class="card-icon icon-blue"><i class="fas fa-wand-magic-sparkles"></i></div>
+                    <span class="card-category cat-blue">Resources</span>
+                    <h3 class="card-title">Pusat Preset</h3>
+                    <p class="card-desc">Kumpulan preset kreatif untuk proyek desain dan editing kamu.</p>
+                    <div class="card-cta">Buka Website <i class="fas fa-arrow-right"></i></div>
+                </a>
+
+                <!-- Cari Key -->
+                <a href="https://besargaji.com/9r4bmNbCE" target="_blank" rel="noopener"
+                   class="card card-amber link-card"
+                   data-title="Mencari Key" data-cat="utility" data-desc="kunci akses kode">
+                    <div class="card-icon icon-amber"><i class="fas fa-key"></i></div>
+                    <span class="card-category cat-amber">Utility</span>
+                    <h3 class="card-title">Mencari Key</h3>
+                    <p class="card-desc">Dapatkan kunci akses atau kode yang kamu butuhkan dengan cepat.</p>
+                    <div class="card-cta">Cek Sekarang <i class="fas fa-arrow-right"></i></div>
+                </a>
+
+            </div>
+
+            <p class="section-label">Komunitas</p>
+            <div class="grid" id="communityGrid">
+
+                <!-- WhatsApp -->
+                <a href="https://whatsapp.com/channel/0029Vb7QGwsF1YlZl7PoIM0Z" target="_blank" rel="noopener"
+                   class="card card-green link-card"
+                   data-title="Saluran WhatsApp" data-cat="komunitas" data-desc="whatsapp channel wa grup">
+                    <div class="card-icon icon-green"><i class="fab fa-whatsapp"></i></div>
+                    <span class="card-category cat-green">Komunitas</span>
+                    <h3 class="card-title">Saluran WhatsApp</h3>
+                    <p class="card-desc">Ikuti saluran WA kami untuk update terbaru, tips, dan konten eksklusif.</p>
+                    <div class="card-cta">Gabung Sekarang <i class="fas fa-arrow-right"></i></div>
+                </a>
+
+                <!-- Discord -->
+                <a href="https://discord.gg/YernxRKn9" target="_blank" rel="noopener"
+                   class="card card-violet link-card"
+                   data-title="Server Discord" data-cat="komunitas" data-desc="discord server chat komunitas">
+                    <div class="card-icon icon-violet"><i class="fab fa-discord"></i></div>
+                    <span class="card-category cat-violet">Komunitas</span>
+                    <h3 class="card-title">Server Discord</h3>
+                    <p class="card-desc">Bergabung ke server Discord kami — diskusi, sharing, dan event komunitas.</p>
+                    <div class="card-cta">Join Server <i class="fas fa-arrow-right"></i></div>
+                </a>
+
+            </div>
+
+            <p class="section-label">Support</p>
+            <div class="grid-single" id="supportGrid">
+
+                <!-- Donate -->
+                <div class="card card-donate card-amber link-card"
+                     id="donateCard"
+                     data-title="Donasi" data-cat="support" data-desc="donate donasi dukung support">
+                    <div class="card-icon icon-amber"><i class="fas fa-heart"></i></div>
+                    <div class="donate-text">
+                        <span class="card-category cat-amber">Support</span>
+                        <h3 class="card-title">Dukung Cattfly ☕</h3>
+                        <p class="card-desc">Suka dengan konten kami? Bantu kami terus berkarya dengan donasi kecil yang berarti besar.</p>
+                        <div class="card-cta">Lihat metode donasi <i class="fas fa-arrow-right"></i></div>
+                    </div>
+                    <button class="donate-btn" id="donateTrigger">
+                        <i class="fas fa-heart"></i> Donasi
+                    </button>
+                </div>
+
+            </div>
         </div>
-    </header>
 
-    <!-- Cards Grid -->
-    <main class="w-full max-w-2xl">
-        <div id="linksGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            
-            <!-- Card 1: Pusat Preset -->
-            <a href="https://cattflylab.vercel.app/" target="_blank" class="link-card glass-card rounded-3xl p-6 flex flex-col h-full group">
-                <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center mb-4 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                    <i class="fas fa-wand-magic-sparkles text-2xl"></i>
-                </div>
-                <span class="text-xs font-semibold text-indigo-500 uppercase tracking-wider mb-2">Resources</span>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">Pusat Preset</h3>
-                <p class="text-slate-500 text-sm flex-grow">Akses berbagai kumpulan preset kreatif untuk proyek desain dan editing kamu.</p>
-                <div class="mt-4 flex items-center text-blue-600 font-semibold text-sm">
-                    Buka Website <i class="fas fa-arrow-right ml-2 transition-transform group-hover:translate-x-1"></i>
-                </div>
-            </a>
-
-            <!-- Card 2: Cari Key (Updated Link) -->
-            <a href="https://besargaji.com/9r4bmNbCE" target="_blank" class="link-card glass-card rounded-3xl p-6 flex flex-col h-full group">
-                <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center mb-4 text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                    <i class="fas fa-key text-2xl"></i>
-                </div>
-                <span class="text-xs font-semibold text-amber-500 uppercase tracking-wider mb-2">Utility</span>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">Mencari Key</h3>
-                <p class="text-slate-500 text-sm flex-grow">Halaman khusus untuk mendapatkan kunci akses atau kode yang kamu butuhkan.</p>
-                <div class="mt-4 flex items-center text-blue-600 font-semibold text-sm">
-                    Cek Sekarang <i class="fas fa-arrow-right ml-2 transition-transform group-hover:translate-x-1"></i>
-                </div>
-            </a>
-
+        <!-- Empty State -->
+        <div id="emptyState">
+            <i class="fas fa-magnifying-glass"></i>
+            <p>Tidak ada hasil untuk "<span id="emptyQuery"></span>"</p>
         </div>
-    </main>
 
-    <footer class="mt-auto text-center text-slate-400 text-sm py-10">
-        <p>&copy; 2024 Cattfly Center. Dibuat dengan rapi.</p>
-    </footer>
+        <!-- Footer -->
+        <footer>
+            <div class="footer-badges">
+                <span class="footer-badge"><i class="fas fa-circle" style="color:var(--accent-green)"></i> Status: Online</span>
+                <span class="footer-badge"><i class="fas fa-bolt" style="color:var(--accent-amber)"></i> v2.0</span>
+                <span class="footer-badge"><i class="fas fa-shield-halved" style="color:var(--accent-blue)"></i> Aman & Terpercaya</span>
+            </div>
+            <p>&copy; 2025 Cattfly Center — Dibuat dengan <span style="color:var(--accent-pink)">♥</span> oleh tim Cattfly.</p>
+        </footer>
+    </div>
+
+    <!-- Donate Modal -->
+    <div class="modal-overlay" id="donateModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">💛 Pilih Metode Donasi</h2>
+                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+            <p style="font-size:0.8rem;color:var(--muted);margin-bottom:1.2rem;font-weight:300;">Setiap dukungan berarti besar bagi kami. Terima kasih!</p>
+            <div class="donate-methods">
+
+                <a href="https://saweria.co/your-link" target="_blank" rel="noopener" class="donate-method">
+                    <div class="dm-icon" style="background:rgba(245,158,11,0.15);color:var(--accent-amber)"><i class="fas fa-mug-hot"></i></div>
+                    <div class="dm-info">
+                        <div class="dm-name">Saweria</div>
+                        <div class="dm-desc">Traktir kopi via Saweria</div>
+                    </div>
+                    <i class="fas fa-arrow-right dm-arrow"></i>
+                </a>
+
+                <a href="https://trakteer.id/your-link" target="_blank" rel="noopener" class="donate-method">
+                    <div class="dm-icon" style="background:rgba(236,72,153,0.15);color:var(--accent-pink)"><i class="fas fa-gift"></i></div>
+                    <div class="dm-info">
+                        <div class="dm-name">Trakteer</div>
+                        <div class="dm-desc">Dukung via Trakteer.id</div>
+                    </div>
+                    <i class="fas fa-arrow-right dm-arrow"></i>
+                </a>
+
+                <div class="donate-method" id="copyDana" style="cursor:pointer">
+                    <div class="dm-icon" style="background:rgba(6,182,212,0.15);color:var(--accent-teal)"><i class="fas fa-mobile-screen"></i></div>
+                    <div class="dm-info">
+                        <div class="dm-name">DANA / GoPay</div>
+                        <div class="dm-desc" id="danaDesc">0857-4553-5579 — klik untuk salin</div>
+                    </div>
+                    <i class="fas fa-copy dm-arrow" id="copyIcon"></i>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle" style="color:var(--accent-green)"></i>
+        <span id="toastMsg">Nomor tersalin!</span>
+    </div>
 
     <script>
+        // === SEARCH ===
         const searchInput = document.getElementById('searchInput');
-        const cards = document.querySelectorAll('.link-card');
+        const allCards = document.querySelectorAll('.link-card');
+        const emptyState = document.getElementById('emptyState');
+        const emptyQuery = document.getElementById('emptyQuery');
+        const sectionLabels = document.querySelectorAll('.section-label');
 
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            
-            cards.forEach(card => {
-                const title = card.querySelector('h3').innerText.toLowerCase();
-                const desc = card.querySelector('p').innerText.toLowerCase();
-                const category = card.querySelector('span').innerText.toLowerCase();
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.toLowerCase().trim();
+            let visible = 0;
 
-                if (title.includes(searchTerm) || desc.includes(searchTerm) || category.includes(searchTerm)) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
+            allCards.forEach(card => {
+                const title = (card.dataset.title || '').toLowerCase();
+                const cat = (card.dataset.cat || '').toLowerCase();
+                const desc = (card.dataset.desc || '').toLowerCase();
+                const match = !q || title.includes(q) || cat.includes(q) || desc.includes(q);
+                card.classList.toggle('hidden', !match);
+                if (match) visible++;
+            });
+
+            emptyState.style.display = visible === 0 ? 'block' : 'none';
+            emptyQuery.textContent = q;
+
+            // hide section labels if all cards in their section are hidden
+            ['mainGrid','communityGrid','supportGrid'].forEach((id, i) => {
+                const grid = document.getElementById(id);
+                if (!grid) return;
+                const anyVisible = [...grid.querySelectorAll('.link-card')].some(c => !c.classList.contains('hidden'));
+                const label = sectionLabels[i];
+                if (label) label.style.display = anyVisible ? '' : 'none';
             });
         });
+
+        // === DONATE MODAL ===
+        const donateModal = document.getElementById('donateModal');
+        const donateTrigger = document.getElementById('donateTrigger');
+        const donateCard = document.getElementById('donateCard');
+        const modalClose = document.getElementById('modalClose');
+
+        function openModal() { donateModal.classList.add('open'); }
+        function closeModal() { donateModal.classList.remove('open'); }
+
+        donateTrigger.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openModal(); });
+        donateCard.addEventListener('click', openModal);
+        modalClose.addEventListener('click', closeModal);
+        donateModal.addEventListener('click', (e) => { if (e.target === donateModal) closeModal(); });
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+        // === COPY DANA NUMBER ===
+        const copyDana = document.getElementById('copyDana');
+        const danaDesc = document.getElementById('danaDesc');
+        const copyIcon = document.getElementById('copyIcon');
+        const DANA_NUMBER = '0857-4553-5579'; // ← ganti dengan nomor asli
+
+        copyDana.addEventListener('click', () => {
+            navigator.clipboard.writeText(DANA_NUMBER).then(() => {
+                danaDesc.textContent = 'Tersalin! ✓';
+                copyIcon.className = 'fas fa-check dm-arrow';
+                copyIcon.style.color = 'var(--accent-green)';
+                showToast('Nomor DANA tersalin ke clipboard!');
+                setTimeout(() => {
+                    danaDesc.textContent = DANA_NUMBER + ' — klik untuk salin';
+                    copyIcon.className = 'fas fa-copy dm-arrow';
+                    copyIcon.style.color = '';
+                }, 2500);
+            });
+        });
+
+        // === TOAST ===
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+        let toastTimer;
+
+        function showToast(msg) {
+            toastMsg.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+        }
     </script>
 </body>
 </html>
