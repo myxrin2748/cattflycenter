@@ -22,6 +22,19 @@
             --accent-green: #10b981;
             --accent-pink: #ec4899;
             --accent-teal: #06b6d4;
+            --shadow-glow: rgba(0,0,0,0.4);
+        }
+
+        /* Light theme override */
+        body.light {
+            --bg: #f5f7fa;
+            --surface: #ffffff;
+            --surface2: #f1f3f8;
+            --border: rgba(0,0,0,0.06);
+            --border-hover: rgba(0,0,0,0.12);
+            --text: #1a1e2b;
+            --muted: #5f6b7a;
+            --shadow-glow: rgba(0,0,0,0.08);
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,6 +45,7 @@
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         /* === ANIMATED BACKGROUND === */
@@ -43,7 +57,9 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
             background-size: 200px 200px;
             opacity: 0.5;
+            transition: opacity 0.3s;
         }
+        body.light .bg-noise { opacity: 0.25; }
 
         .bg-glow {
             position: fixed;
@@ -54,7 +70,9 @@
                 radial-gradient(ellipse 60% 50% at 20% 10%, rgba(79, 142, 247, 0.08) 0%, transparent 70%),
                 radial-gradient(ellipse 50% 40% at 80% 80%, rgba(139, 92, 246, 0.07) 0%, transparent 70%),
                 radial-gradient(ellipse 40% 50% at 50% 50%, rgba(6, 182, 212, 0.04) 0%, transparent 70%);
+            transition: opacity 0.3s;
         }
+        body.light .bg-glow { opacity: 0.6; }
 
         /* === LAYOUT === */
         .container {
@@ -128,6 +146,30 @@
             margin-bottom: 1.2rem;
         }
 
+        /* Theme toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            cursor: pointer;
+            transition: color 0.2s, background 0.2s, transform 0.3s;
+            z-index: 10;
+        }
+        .theme-toggle:hover {
+            color: var(--text);
+            background: var(--surface2);
+            transform: scale(1.08);
+        }
+
         /* === SEARCH === */
         .search-wrap {
             max-width: 420px;
@@ -159,13 +201,19 @@
             font-family: 'DM Sans', sans-serif;
             font-size: 0.875rem;
             outline: none;
-            transition: border-color 0.25s, box-shadow 0.25s;
+            transition: border-color 0.25s, box-shadow 0.25s, background 0.3s;
         }
 
         #searchInput::placeholder { color: var(--muted); }
         #searchInput:focus {
             border-color: rgba(79, 142, 247, 0.5);
             box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.1);
+        }
+
+        /* Screen reader only */
+        .sr-only {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
         }
 
         /* === SECTION LABEL === */
@@ -199,6 +247,46 @@
             .grid { grid-template-columns: 1fr; }
         }
 
+        /* === CARD SKELETON LOADER === */
+        .card.skeleton {
+            pointer-events: none;
+            position: relative;
+            overflow: hidden;
+        }
+        .card.skeleton::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            animation: shimmer 1.8s infinite;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .card.skeleton .card-icon,
+        .card.skeleton .card-category,
+        .card.skeleton .card-title,
+        .card.skeleton .card-desc,
+        .card.skeleton .card-cta,
+        .card.skeleton .donate-btn {
+            background: var(--surface2);
+            color: transparent !important;
+            border-radius: 8px;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .card.skeleton .card-icon { width: 44px; height: 44px; border-radius: 13px; }
+        .card.skeleton .card-category { width: 60%; height: 0.7rem; margin-bottom: 0.4rem; }
+        .card.skeleton .card-title { width: 75%; height: 1.2rem; margin-bottom: 0.5rem; }
+        .card.skeleton .card-desc { width: 90%; height: 0.8rem; }
+        .card.skeleton .card-cta { width: 40%; height: 0.8rem; margin-top: 1rem; }
+        .card.skeleton .donate-btn { width: 80px; height: 34px; border-radius: 10px; }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
         /* === CARD === */
         .card {
             display: flex;
@@ -211,7 +299,7 @@
             color: inherit;
             position: relative;
             overflow: hidden;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.25s, box-shadow 0.3s;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.25s, box-shadow 0.3s, background 0.3s;
             cursor: pointer;
             animation: fadeUp 0.5s ease both;
         }
@@ -229,18 +317,18 @@
         .card:hover {
             transform: translateY(-5px) scale(1.01);
             border-color: var(--border-hover);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 0 1px var(--card-accent, var(--accent-blue)) inset;
+            box-shadow: 0 16px 40px var(--shadow-glow), 0 0 0 1px var(--card-accent, var(--accent-blue)) inset;
         }
 
         .card:hover::before { opacity: 1; }
 
         /* Accent glow on hover per card color */
-        .card-blue:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 25px rgba(79,142,247,0.12); }
-        .card-amber:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 25px rgba(245,158,11,0.12); }
-        .card-green:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 25px rgba(16,185,129,0.12); }
-        .card-pink:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 25px rgba(236,72,153,0.12); }
-        .card-teal:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 25px rgba(6,182,212,0.12); }
-        .card-violet:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 25px rgba(139,92,246,0.12); }
+        .card-blue:hover { box-shadow: 0 16px 40px var(--shadow-glow), 0 0 25px rgba(79,142,247,0.12); }
+        .card-amber:hover { box-shadow: 0 16px 40px var(--shadow-glow), 0 0 25px rgba(245,158,11,0.12); }
+        .card-green:hover { box-shadow: 0 16px 40px var(--shadow-glow), 0 0 25px rgba(16,185,129,0.12); }
+        .card-pink:hover { box-shadow: 0 16px 40px var(--shadow-glow), 0 0 25px rgba(236,72,153,0.12); }
+        .card-teal:hover { box-shadow: 0 16px 40px var(--shadow-glow), 0 0 25px rgba(6,182,212,0.12); }
+        .card-violet:hover { box-shadow: 0 16px 40px var(--shadow-glow), 0 0 25px rgba(139,92,246,0.12); }
 
         /* Stagger animation delays */
         .card:nth-child(1) { animation-delay: 0.15s; }
@@ -408,9 +496,14 @@
             background: var(--surface);
             border: 1px solid var(--border);
             color: var(--muted);
+            cursor: pointer;
+            transition: background 0.2s;
         }
 
         .footer-badge i { font-size: 0.65rem; }
+
+        .footer-badge.sound-toggle { cursor: pointer; }
+        .footer-badge.sound-toggle.active { color: var(--accent-green); border-color: var(--accent-green); }
 
         /* === TOAST === */
         .toast {
@@ -431,7 +524,7 @@
             opacity: 0;
             transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
             white-space: nowrap;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 30px var(--shadow-glow);
         }
 
         .toast.show {
@@ -469,6 +562,7 @@
             width: 100%;
             transform: scale(0.92) translateY(20px);
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: var(--text);
         }
 
         .modal-overlay.open .modal { transform: scale(1) translateY(0); }
@@ -554,6 +648,11 @@
     <div class="bg-noise"></div>
     <div class="bg-glow"></div>
 
+    <!-- Theme toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Ganti tema">
+        <i class="fas fa-sun"></i>
+    </button>
+
     <div class="container">
         <!-- Header -->
         <header>
@@ -565,19 +664,20 @@
             <p class="subtitle">Hub terpusat untuk semua resource, tool, dan komunitas Cattfly.</p>
 
             <div class="search-wrap">
-                <i class="fas fa-search"></i>
+                <label for="searchInput" class="sr-only">Cari link, kategori...</label>
+                <i class="fas fa-search" aria-hidden="true"></i>
                 <input type="text" id="searchInput" placeholder="Cari link, kategori..." autocomplete="off" spellcheck="false">
             </div>
         </header>
 
         <!-- Main Links -->
         <div id="allCards">
-            <p class="section-label">Resources & Tools</p>
+            <p class="section-label" data-section="mainGrid">Resources & Tools</p>
             <div class="grid" id="mainGrid">
 
                 <!-- Pusat Preset -->
                 <a href="https://cattflylab.vercel.app/" target="_blank" rel="noopener"
-                   class="card card-blue link-card"
+                   class="card card-blue link-card skeleton"
                    data-title="Pusat Preset" data-cat="resources" data-desc="preset kreatif desain editing">
                     <div class="card-icon icon-blue"><i class="fas fa-wand-magic-sparkles"></i></div>
                     <span class="card-category cat-blue">Resources</span>
@@ -588,7 +688,7 @@
 
                 <!-- Cari Key -->
                 <a href="https://besargaji.com/9r4bmNbCE" target="_blank" rel="noopener"
-                   class="card card-amber link-card"
+                   class="card card-amber link-card skeleton"
                    data-title="Mencari Key" data-cat="utility" data-desc="kunci akses kode">
                     <div class="card-icon icon-amber"><i class="fas fa-key"></i></div>
                     <span class="card-category cat-amber">Utility</span>
@@ -599,12 +699,12 @@
 
             </div>
 
-            <p class="section-label">Komunitas</p>
+            <p class="section-label" data-section="communityGrid">Komunitas</p>
             <div class="grid" id="communityGrid">
 
                 <!-- WhatsApp -->
                 <a href="https://whatsapp.com/channel/0029Vb7QGwsF1YlZl7PoIM0Z" target="_blank" rel="noopener"
-                   class="card card-green link-card"
+                   class="card card-green link-card skeleton"
                    data-title="Saluran WhatsApp" data-cat="komunitas" data-desc="whatsapp channel wa grup">
                     <div class="card-icon icon-green"><i class="fab fa-whatsapp"></i></div>
                     <span class="card-category cat-green">Komunitas</span>
@@ -615,7 +715,7 @@
 
                 <!-- Discord -->
                 <a href="https://discord.gg/YernxRKn9" target="_blank" rel="noopener"
-                   class="card card-violet link-card"
+                   class="card card-violet link-card skeleton"
                    data-title="Server Discord" data-cat="komunitas" data-desc="discord server chat komunitas">
                     <div class="card-icon icon-violet"><i class="fab fa-discord"></i></div>
                     <span class="card-category cat-violet">Komunitas</span>
@@ -626,11 +726,11 @@
 
             </div>
 
-            <p class="section-label">Support</p>
+            <p class="section-label" data-section="supportGrid">Support</p>
             <div class="grid-single" id="supportGrid">
 
                 <!-- Donate -->
-                <div class="card card-donate card-amber link-card"
+                <div class="card card-donate card-amber link-card skeleton"
                      id="donateCard"
                      data-title="Donasi" data-cat="support" data-desc="donate donasi dukung support">
                     <div class="card-icon icon-amber"><i class="fas fa-heart"></i></div>
@@ -660,17 +760,18 @@
                 <span class="footer-badge"><i class="fas fa-circle" style="color:var(--accent-green)"></i> Status: Online</span>
                 <span class="footer-badge"><i class="fas fa-bolt" style="color:var(--accent-amber)"></i> v2.0</span>
                 <span class="footer-badge"><i class="fas fa-shield-halved" style="color:var(--accent-blue)"></i> Aman & Terpercaya</span>
+                <span class="footer-badge sound-toggle" id="soundToggle"><i class="fas fa-volume-high"></i> Suara</span>
             </div>
             <p>&copy; 2025 Cattfly Center — Dibuat dengan <span style="color:var(--accent-pink)">♥</span> oleh tim Cattfly.</p>
         </footer>
     </div>
 
     <!-- Donate Modal -->
-    <div class="modal-overlay" id="donateModal">
+    <div class="modal-overlay" id="donateModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal">
             <div class="modal-header">
-                <h2 class="modal-title">💛 Pilih Metode Donasi</h2>
-                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+                <h2 class="modal-title" id="modalTitle">💛 Pilih Metode Donasi</h2>
+                <button class="modal-close" id="modalClose" aria-label="Tutup modal"><i class="fas fa-times"></i></button>
             </div>
             <p style="font-size:0.8rem;color:var(--muted);margin-bottom:1.2rem;font-weight:300;">Setiap dukungan berarti besar bagi kami. Terima kasih!</p>
             <div class="donate-methods">
@@ -693,7 +794,7 @@
                     <i class="fas fa-arrow-right dm-arrow"></i>
                 </a>
 
-                <div class="donate-method" id="copyDana" style="cursor:pointer">
+                <div class="donate-method" id="copyDana" style="cursor:pointer" role="button" tabindex="0">
                     <div class="dm-icon" style="background:rgba(6,182,212,0.15);color:var(--accent-teal)"><i class="fas fa-mobile-screen"></i></div>
                     <div class="dm-info">
                         <div class="dm-name">DANA / GoPay</div>
@@ -707,20 +808,127 @@
     </div>
 
     <!-- Toast -->
-    <div class="toast" id="toast">
+    <div class="toast" id="toast" role="status" aria-live="polite">
         <i class="fas fa-check-circle" style="color:var(--accent-green)"></i>
         <span id="toastMsg">Nomor tersalin!</span>
     </div>
 
     <script>
-        // === SEARCH ===
+        // === SOUND FX (Web Audio) ===
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        let soundEnabled = true; // default on
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+        }
+
+        function playClickSound() {
+            if (!soundEnabled || !audioCtx) return;
+            // simple short click sound
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        // Unlock audio on first user interaction
+        document.addEventListener('click', initAudio, { once: true });
+        document.addEventListener('touchstart', initAudio, { once: true });
+
+        // Sound toggle button
+        const soundToggle = document.getElementById('soundToggle');
+        soundToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            soundEnabled = !soundEnabled;
+            if (soundEnabled) {
+                soundToggle.classList.add('active');
+                soundToggle.innerHTML = '<i class="fas fa-volume-high"></i> Suara';
+                initAudio();
+            } else {
+                soundToggle.classList.remove('active');
+                soundToggle.innerHTML = '<i class="fas fa-volume-xmark"></i> Suara';
+            }
+            // Simpan preferensi
+            localStorage.setItem('cattfly_sound', soundEnabled ? '1' : '0');
+        });
+
+        // Load sound preference
+        const savedSound = localStorage.getItem('cattfly_sound');
+        if (savedSound === '0') {
+            soundEnabled = false;
+            soundToggle.classList.remove('active');
+            soundToggle.innerHTML = '<i class="fas fa-volume-xmark"></i> Suara';
+        } else {
+            soundToggle.classList.add('active');
+        }
+
+        // Attach click sound to all cards
+        document.querySelectorAll('.link-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                // Don't fire if clicking on donate button (it will fire from modal anyway)
+                if (e.target.closest('#donateTrigger')) return;
+                playClickSound();
+            });
+        });
+
+        // === THEME TOGGLE ===
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function setTheme(isLight) {
+            if (isLight) {
+                body.classList.add('light');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                localStorage.setItem('cattfly_theme', 'light');
+            } else {
+                body.classList.remove('light');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                localStorage.setItem('cattfly_theme', 'dark');
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isLight = body.classList.contains('light');
+            setTheme(!isLight);
+            playClickSound();
+        });
+
+        // Load theme
+        const savedTheme = localStorage.getItem('cattfly_theme');
+        if (savedTheme === 'light') {
+            setTheme(true);
+        } else {
+            setTheme(false); // default dark
+        }
+
+        // === SEARCH WITH LOCAL STORAGE ===
         const searchInput = document.getElementById('searchInput');
         const allCards = document.querySelectorAll('.link-card');
         const emptyState = document.getElementById('emptyState');
         const emptyQuery = document.getElementById('emptyQuery');
-        const sectionLabels = document.querySelectorAll('.section-label');
+
+        // Restore search query
+        const savedQuery = localStorage.getItem('cattfly_search');
+        if (savedQuery) {
+            searchInput.value = savedQuery;
+            performSearch();
+        }
 
         searchInput.addEventListener('input', () => {
+            localStorage.setItem('cattfly_search', searchInput.value);
+            performSearch();
+        });
+
+        function performSearch() {
             const q = searchInput.value.toLowerCase().trim();
             let visible = 0;
 
@@ -736,31 +944,82 @@
             emptyState.style.display = visible === 0 ? 'block' : 'none';
             emptyQuery.textContent = q;
 
-            // hide section labels if all cards in their section are hidden
-            ['mainGrid','communityGrid','supportGrid'].forEach((id, i) => {
-                const grid = document.getElementById(id);
-                if (!grid) return;
-                const anyVisible = [...grid.querySelectorAll('.link-card')].some(c => !c.classList.contains('hidden'));
-                const label = sectionLabels[i];
-                if (label) label.style.display = anyVisible ? '' : 'none';
+            // Hide section labels using data-section
+            document.querySelectorAll('.section-label[data-section]').forEach(label => {
+                const gridId = label.dataset.section;
+                const grid = document.getElementById(gridId);
+                if (grid) {
+                    const anyVisible = [...grid.querySelectorAll('.link-card')].some(c => !c.classList.contains('hidden'));
+                    label.style.display = anyVisible ? '' : 'none';
+                }
             });
+        }
+
+        // === REMOVE SKELETON AFTER LOAD ===
+        window.addEventListener('load', () => {
+            // Small delay to let animation play
+            setTimeout(() => {
+                document.querySelectorAll('.card.skeleton').forEach(card => {
+                    card.classList.remove('skeleton');
+                });
+            }, 300);
         });
 
-        // === DONATE MODAL ===
+        // === DONATE MODAL (fixed double trigger & a11y) ===
         const donateModal = document.getElementById('donateModal');
         const donateTrigger = document.getElementById('donateTrigger');
         const donateCard = document.getElementById('donateCard');
         const modalClose = document.getElementById('modalClose');
 
-        function openModal() { donateModal.classList.add('open'); }
-        function closeModal() { donateModal.classList.remove('open'); }
+        function openModal() { 
+            donateModal.classList.add('open'); 
+            // Trap focus inside modal
+            modalClose.focus();
+        }
+        function closeModal() { 
+            donateModal.classList.remove('open'); 
+            donateTrigger.focus(); // Return focus
+        }
 
-        donateTrigger.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openModal(); });
-        donateCard.addEventListener('click', openModal);
+        // Only button triggers modal, not whole card
+        donateTrigger.addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            e.stopPropagation(); 
+            openModal(); 
+            playClickSound();
+        });
+
+        // Allow clicking on the donate card text area to also open modal
+        donateCard.addEventListener('click', (e) => {
+            if (e.target === donateCard || e.target.closest('.donate-text')) {
+                openModal();
+                playClickSound();
+            }
+        });
+
         modalClose.addEventListener('click', closeModal);
         donateModal.addEventListener('click', (e) => { if (e.target === donateModal) closeModal(); });
 
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+        // Trap focus
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && donateModal.classList.contains('open')) {
+                closeModal();
+                return;
+            }
+            if (e.key === 'Tab' && donateModal.classList.contains('open')) {
+                const focusable = donateModal.querySelectorAll('button, a, [tabindex]:not([tabindex="-1"])');
+                if (focusable.length === 0) return;
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        });
 
         // === COPY DANA NUMBER ===
         const copyDana = document.getElementById('copyDana');
@@ -774,12 +1033,21 @@
                 copyIcon.className = 'fas fa-check dm-arrow';
                 copyIcon.style.color = 'var(--accent-green)';
                 showToast('Nomor DANA tersalin ke clipboard!');
+                playClickSound();
                 setTimeout(() => {
                     danaDesc.textContent = DANA_NUMBER + ' — klik untuk salin';
                     copyIcon.className = 'fas fa-copy dm-arrow';
                     copyIcon.style.color = '';
                 }, 2500);
             });
+        });
+
+        // Allow keyboard activation on copyDana
+        copyDana.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                copyDana.click();
+            }
         });
 
         // === TOAST ===
